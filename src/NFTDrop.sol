@@ -22,6 +22,7 @@ contract NFTDrop is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, ER
         _grantRole(PAUSER_ROLE, _msgSender());
         _grantRole(MINTER_ROLE, _msgSender());
         _grantRole(MANAGER_ROLE, _msgSender());
+        _grantRole(URI_SETTER_ROLE, _msgSender());
         _setRoleAdmin(CLAIM_ROLE, MANAGER_ROLE); // This makes MANAGER_ROLE admin of CLAIM_ROLE, greater security
     }
 
