@@ -7,7 +7,9 @@ import {ERC1155Burnable} from "@openzeppelin/contracts/token/ERC1155/extensions/
 import {ERC1155Pausable} from "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Pausable.sol";
 import {ERC1155Supply} from "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 
+error InvalidValue();
 error MaxClaimAmountReached();
+error TokenIdOutOfRange();
 
 contract NFTDrop is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, ERC1155Supply {
         
@@ -17,6 +19,8 @@ contract NFTDrop is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, ER
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant URI_SETTER_ROLE = keccak256("URI_SETTER_ROLE");
 
+    uint256 public maxTokenId;
+
     constructor() ERC1155("") {
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(PAUSER_ROLE, _msgSender());
@@ -24,11 +28,19 @@ contract NFTDrop is ERC1155, AccessControl, ERC1155Pausable, ERC1155Burnable, ER
         _grantRole(MANAGER_ROLE, _msgSender());
         _grantRole(URI_SETTER_ROLE, _msgSender());
         _setRoleAdmin(CLAIM_ROLE, MANAGER_ROLE); // This makes MANAGER_ROLE admin of CLAIM_ROLE, greater security
+
+        maxTokenId = 61;
     }
 
-    function claim() external onlyRole(CLAIM_ROLE) {
+    function claim(uint256 tokenId) external onlyRole(CLAIM_ROLE) {
+        if (tokenId < 1 || tokenId > maxTokenId) revert TokenIdOutOfRange();
         if (balanceOf(_msgSender(), 1) >= 20) revert MaxClaimAmountReached();
-        _mint(_msgSender(), 1, 1, "");
+        _mint(_msgSender(), tokenId, 1, "");
+    }
+
+    function setMaxTokenId(uint256 newValue) external onlyRole(MANAGER_ROLE) {
+        if (newValue <= maxTokenId) revert InvalidValue();
+        maxTokenId = newValue;
     }
 
     function addUserClaim(address user) external onlyRole(MANAGER_ROLE) {

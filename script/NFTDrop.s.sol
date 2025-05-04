@@ -12,7 +12,7 @@ contract NFTDropScript is Script {
     function run() public {
         vm.startBroadcast();
 
-        drop = new NFTDrop()
+        drop = new NFTDrop();
         drop.setURI("ipfs://");
 
         vm.stopBroadcast();
